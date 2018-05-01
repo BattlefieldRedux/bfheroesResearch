@@ -1,0 +1,105 @@
+
+FeslPacket = struct {
+FeslHeader, // 12 bytes
+Data // 0 terminated string)
+}
+
+FeslHeader = struct {
+FeslCommand, // 4 bytes
+FeslTypeAndNumber, // 4 bytes, BigEndian!
+PaketSize, // 4 bytes, BigEndian!, Data_size + 12
+}
+
+FeslTypeAndNumber = ( FeslType << 24 ) | PacketNumber
+
+PacketNumber - sends request to server with unique number you receive answer with same number (order may be wrong!)
+
+FeslType = enum {
+0xC0 - TAG_SINGLE_CLIENT // one packet request
+0x80 - TAG_SINGLE_SERVER // one packet answer/request
+0xF0 - TAG_MULTI_CLIENT // part of multipacket request (all parts with one PacketNumber)
+0xB0 - TAG_MULTI_SERVER // part of multipacket answer/request (all parts with one PacketNumber)
+}
+
+0x80 or 0xc0 - first byte
+which is basically an enumerator
+it is popular in Cpp development to use enumerators which bases on multiplication of 2 or some byte transposition
+ 0xc0 is 192 and 0x80 is 128
+so there is a pattern - 64
+ thats interesting
+ there is also 0x40
+which is basicallly equal to 64
+
+
+ ->N req fsys 0xc0000001 {TXN=Hello, clientString=bfwest-pc, sku=125170, locale=en_US, clientPlatform=PC, clientVersion="1.42.217478.0 ", SDKVersion=5.0.0.0.0, protocolVersion=2.0, fragmentSize=8096, clientType=client-noreg}
+ <-A req fsys 0xc0000000 {TXN=MemCheck, salt=}
+->R res fsys 0x80000000 {TXN=MemCheck, result=}
+<-A gsum {TXN=GetSessionId}
+<-N req fsys 0xc0000001 {TXN=Hello, domainPartition.domain=eagames, domainPartition.subDomain=bfwest-dedicated, activityTimeoutSecs=216000, curTime=Apr-26-2018}
+Current Time: Apr-26-2018
+Adjusted Local Time (Local Timezone): APR-25-2018 21:00:00 UTC
+Adjusted Local Time (Server Timezone, UTC): APR-26-2018 00:00:00 UTC
+Time Difference (Seconds): -85825
+->N req acct 0xc0000002 {TXN=NuLogin, returnEncryptedInfo=1, encryptedInfo=mD%DFD*PsALWE9*a5d8CMzSA2M#, macAddr=$7054d2c71bb1}
+ <-N req acct 0xc0000002 {TXN=NuLogin, profileId=2, userId=2, nuid=lok, returnEncryptedInfo=1, lkey=ddSSGGHsjdy4*&$*$&*$&*$&Df}
+ ->N req acct 0xc0000003 {TXN=NuGetPersonas, namespace=}
+ <-N req acct 0xc0000003 {TXN=NuGetPersonas, personas.[]=3, personas.0=|ccc|xSyn, personas.1=sos, personas.2=sus}
+->N req acct 0xc0000004 {TXN=NuGetAccount}
+->N req rank 0xc0000005 {TXN=GetStats, owner=2, ownerType=1, periodId=0, periodPast=0, keys.0=c_ltm, keys.1=c_slm, keys.2=c_tut, keys.[]=3}
+ ->N req acct 0xc0000006 {TXN=NuLookupUserInfo, userInfo.[]=3, userInfo.0.userName=sos, userInfo.1.userName=sus, userInfo.2.userName=|ccc|xSyn}
+ <-N req acct 0xc0000004 {TXN=NuGetAccount, nuid=superuser@gmail.com, userId=2, heroName=lok, DOBDay=1, DOBMonth=1, DOBYear=1992, country=US, language=en_US, globalOptin=0, thirdPartyOptin=0}
+ <-N req rank 0xc0000005 {TXN=GetStats, ownerId=2, ownerType=1, stats.[]=3, stats.0.key=c_ltm, stats.0.text=9370.0000, stats.0.value=9370.0000, stats.1.key=c_slm, stats.1.text=5.0000, stats.1.value=5.0000, stats.2.key=c_tut, stats.2.text=2.0000[08:50:27 PM] , stats.2.value=2.0000}
+ <-N req acct 0xc0000006 {TXN=NuLookupUserInfo, userInfo.[]=3, userInfo.0.namespace=MAIN, userInfo.0.xuid=24, userInfo.0.masterUserId=3, userInfo.0.userId=3, userInfo.0.userName=sos, userInfo.1.namespace=MAIN, userInfo.1.xuid=24, userInfo.1.masterUserId=4[08:50:27 PM] , userInfo.1.userId=4, userInfo.1.userName=sus, userInfo.2.namespace=MAIN, userInfo.2.xuid=24, userInfo.2.masterUserId=2, userInfo.2.userId=2, userInfo.2.userName=|ccc|xSyn}
+ ->N req rank 0xc0000007 {TXN=GetStatsForOwners, owners.[]=3, owners.0.ownerId=2, owners.0.ownerType=1, owners.1.ownerId=3, owners.1.ownerType=1, owners.2.ownerId=4, owners.2.ownerType=1, periodId=0, keys.0=elo, keys.1=xp, keys.2=level, keys.3=c_apr[08:50:28 PM] , keys.4=c_fhrs, keys.5=c_hrs, keys.6=c_hrc, keys.7=c_skc, keys.8=c_ft, keys.9=c_kit, keys.10=c_team, keys.[]=11}
+ <-N req rank 0xc0000007 {TXN=GetStats, stats.[]=3, stats.0.stats.[]=11, stats.0.stats.0.key=c_apr, stats.0.stats.0.text=9;73, stats.0.stats.0.value=9;73, stats.0.stats.1.key=c_ft, stats.0.stats.1.text=0, stats.0.stats.1.value=0, stats.0.stats.2.key=c_hrc[08:50:28 PM] , stats.0.stats.2.text=2, stats.0.stats.2.value=2, stats.0.stats.3.key=c_hrs, stats.0.stats.3.text=121, stats.0.stats.3.value=121, stats.0.stats.4.key=c_kit, stats.0.stats.4.text=2, stats.0.stats.4.value=2, stats.0.stats.5.key=c_skc[08:50:28 PM] , stats.0.stats.5.text=4, stats.0.stats.5.value=4, stats.0.stats.6.key=c_team, stats.0.stats.6.text=1, stats.0.stats.6.value=1, stats.0.stats.7.key=elo, stats.0.stats.7.text=1000, stats.0.stats.7.value=1000, stats.0.stats.8.key=level[08:50:28 PM] , stats.0.stats.8.text=1, stats.0.stats.8.value=1, stats.0.stats.9.key=c_fhrs, stats.0.stats.9.text=, stats.0.stats.9.value=, stats.0.stats.10.key=xp, stats.0.stats.10.text=, stats.0.stats.10.value=, stats.0.ownerId=2, stats.0.ownerType=1[08:50:28 PM] , stats.1.stats.[]=11, stats.1.stats.0.key=c_apr, stats.1.stats.0.text=4;36, stats.1.stats.0.value=4;36, stats.1.stats.1.key=c_ft, stats.1.stats.1.text=109, stats.1.stats.1.value=109, stats.1.stats.2.key=c_hrc, stats.1.stats.2.text=3[08:50:28 PM] , stats.1.stats.2.value=3, stats.1.stats.3.key=c_hrs, stats.1.stats.3.text=83, stats.1.stats.3.value=83, stats.1.stats.4.key=c_kit, stats.1.stats.4.text=2, stats.1.stats.4.value=2, stats.1.stats.5.key=c_skc, stats.1.stats.5.text=3[08:50:28 PM] , stats.1.stats.5.value=3, stats.1.stats.6.key=c_team, stats.1.stats.6.text=2, stats.1.stats.6.value=2, stats.1.stats.7.key=elo, stats.1.stats.7.text=1000, stats.1.stats.7.value=1000, stats.1.stats.8.key=level, stats.1.stats.8.text=1[08:50:28 PM] , stats.1.stats.8.value=1, stats.1.stats.9.key=xp, stats.1.stats.9.text=, stats.1.stats.9.value=, stats.1.stats.10.key=c_fhrs, stats.1.stats.10.text=, stats.1.stats.10.value=, stats.1.ownerId=3, stats.1.ownerType=1, stats.2.stats.[]=11[08:50:28 PM] , stats.2.stats.0.key=c_apr, stats.2.stats.0.text=979;981, stats.2.stats.0.value=979;981, stats.2.stats.1.key=c_ft, stats.2.stats.1.text=132, stats.2.stats.1.value=132, stats.2.stats.2.key=c_hrc, stats.2.stats.2.text=2, stats.2.stats.2.value=2[08:50:28 PM] , stats.2.stats.3.key=c_hrs, stats.2.stats.3.text=121, stats.2.stats.3.value=121, stats.2.stats.4.key=c_kit, stats.2.stats.4.text=0, stats.2.stats.4.value=0, stats.2.stats.5.key=c_skc, stats.2.stats.5.text=2, stats.2.stats.5.value=2[08:50:28 PM] , stats.2.stats.6.key=c_team, stats.2.stats.6.text=1, stats.2.stats.6.value=1, stats.2.stats.7.key=elo, stats.2.stats.7.text=1000, stats.2.stats.7.value=1000, stats.2.stats.8.key=level, stats.2.stats.8.text=1, stats.2.stats.8.value=1[08:50:28 PM] , stats.2.stats.9.key=c_fhrs, stats.2.stats.9.text=, stats.2.stats.9.value=, stats.2.stats.10.key=xp, stats.2.stats.10.text=, stats.2.stats.10.value=, stats.2.ownerId=4, stats.2.ownerType=1}
+ ->N req acct 0xc0000008 {TXN=NuLoginPersona, name=sos}
+ <-N req acct 0xc0000008 {TXN=NuLoginPersona, profileId=2, userId=2, nuid=, returnEncryptedInfo=0, lkey=e8251b97-9862-4752-ba3b-d839fa04482c}
+ name: zovix.ddns.net,port: 18275,address: -1190320542
+ conn made
+ ->N req fsys 0xc0000009 {TXN=GetPingSites}
+ UpnpFirewallDetector: Trying to open port 0...
+ ->N CONN 0x40000000 {PROT=2, PROD=bfwest-pc, VERS="1.42.217478.0 ", PLAT=PC, LOCALE=en_US, SDKVERSION=5.0.0.0.0, TID=1}
+ <-N req fsys 0xc0000009 {TXN=GetPingSites, minPingSitesToPing=1, pingSites.[]=1, pingSites.0.addr=127.0.0.1, pingSites.0.name=iad, pingSites.0.type=1}
+ <-N CONN {TID=1, TIME=1524775832, activityTimeoutSecs=3600, PROT=2}
+ ->N USER 0x40000000 {CID=, MAC=$7054d2c71bb1, SKU=125170, LKEY=e8251b97-9862-4752-ba3b-d839fa04482c, NAME=, TID=2}
+ <-N USER {TID=2, NAME=sos, CID=}
+ UpnpFirewallDetector: Initial firewall Port openned successfully
+ GM: GameManager listening on port 59479
+ ->D ECHO {TID=1, TYPE=1, UID=2}
+ ->N req rank 0xc000000a {TXN=GetStats, owner=3, ownerType=1, periodId=0, periodPast=0, keys.0=c_items, keys.1=c_wallet_hero, keys.2=c_wallet_valor, keys.[]=3}
+ ->N req rank 0xc000000b {TXN=GetStats, owner=2, ownerType=1, periodId=0, periodPast=0, keys.0=cdm, keys.1=edm, keys.[]=2}
+ ->N req rank 0xc000000c {TXN=GetStats, owner=3, ownerType=1, periodId=0, periodPast=0, keys.0=aw6000, keys.1=aw6001, keys.2=aw6004, keys.3=aw6005, keys.4=aw6008, keys.5=aw6009, keys.6=aw6012, keys.7=aw6013, keys.8=aw6087, keys.9=aw6088, keys.10=aw6091[08:50:36 PM] , keys.11=aw6092, keys.12=c_cmid0, keys.13=c_cmid1, keys.14=c_cmid2, keys.15=c_emo, keys.16=c_eqp, keys.17=c_ltp, keys.18=c_wmid0, keys.19=c_wmid1, keys.20=c_wmid2, keys.21=m0c0, keys.22=m0c1, keys.23=m0c2, keys.24=m0c3, keys.25=m0c4, keys.26=m0c5[08:50:36 PM] , keys.27=m1c0, keys.28=m1c1, keys.29=m1c2, keys.30=m1c3, keys.31=m1c4, keys.32=m1c5, keys.33=m2c0, keys.34=m2c1, keys.35=m2c2, keys.36=m2c3, keys.37=m2c4, keys.38=m2c5, keys.39=mid0, keys.40=mid1, keys.41=mid2, keys.[]=42}
+ ->D ECHO {TID=1, TYPE=1, UID=2}
+ <-D ECHO {TID=1, IP=177.32.252.39, PORT=59479, ERR=0, TYPE=1, UGID=, UID=2}
+ <-N req rank 0xc000000a {TXN=GetStats, ownerId=3, ownerType=1, stats.[]=3, stats.0.key=c_items, stats.0.text=, stats.0.value=0, stats.1.key=c_wallet_hero, stats.1.text=, stats.1.value=0, stats.2.key=c_wallet_valor, stats.2.text=, stats.2.value=0}
+20:50:37 : [08:50:37 PM] <-N req rank 0xc000000b {TXN=GetStats, ownerId=2, ownerType=1, stats.[]=2, stats.0.key=cdm, stats.0.text=, stats.0.value=0, stats.1.key=edm, stats.1.text=, stats.1.value=0}
+20:50:37 : [08:50:37 PM] <-N req rank 0xc000000c {TXN=GetStats, ownerId=3, ownerType=1, stats.[]=42, stats.0.key=c_emo, stats.0.text=5000;5007;5016;0;5078;0;0;0;0, stats.0.value=5000;5007;5016;0;5078;0;0;0;0, stats.1.key=c_eqp, stats.1.text=3003;3009;0;2026;0;0;0;0;0;0[08:50:37 PM] , stats.1.value=3003;3009;0;2026;0;0;0;0;0;0, stats.2.key=c_ltp, stats.2.text=9370.0000, stats.2.value=9370.0000, stats.3.key=c_wmid0, stats.3.text=0.0000, stats.3.value=0.0000, stats.4.key=c_wmid1, stats.4.text=0.0000, stats.4.value=0.0000[08:50:37 PM] , stats.5.key=mid0, stats.5.text=6000.0000, stats.5.value=6000.0000, stats.6.key=mid1, stats.6.text=0.0000, stats.6.value=0.0000, stats.7.key=aw6088, stats.7.text=, stats.7.value=0, stats.8.key=m0c1, stats.8.text=, stats.8.value=0, stats.9.key=m0c5[08:50:37 PM] , stats.9.text=, stats.9.value=0, stats.10.key=m1c0, stats.10.text=, stats.10.value=0, stats.11.key=aw6004, stats.11.text=, stats.11.value=0, stats.12.key=aw6008, stats.12.text=, stats.12.value=0, stats.13.key=c_cmid0, stats.13.text=, stats.13.value=0[08:50:37 PM] , stats.14.key=c_cmid2, stats.14.text=, stats.14.value=0, stats.15.key=m0c2, stats.15.text=, stats.15.value=0, stats.16.key=m1c2, stats.16.text=, stats.16.value=0, stats.17.key=m1c3, stats.17.text=, stats.17.value=0, stats.18.key=aw6009, stats.18.text=[08:50:37 PM] , stats.18.value=0, stats.19.key=aw6087, stats.19.text=, stats.19.value=0, stats.20.key=aw6091, stats.20.text=, stats.20.value=0, stats.21.key=c_cmid1, stats.21.text=, stats.21.value=0, stats.22.key=m0c0, stats.22.text=, stats.22.value=0[08:50:37 PM] , stats.23.key=m2c2, stats.23.text=, stats.23.value=0, stats.24.key=aw6005, stats.24.text=, stats.24.value=0, stats.25.key=aw6012, stats.25.text=, stats.25.value=0, stats.26.key=m2c0, stats.26.text=, stats.26.value=0, stats.27.key=m2c5, stats.27.text=[08:50:37 PM] , stats.27.value=0, stats.28.key=aw6013, stats.28.text=, stats.28.value=0, stats.29.key=m1c4, stats.29.text=, stats.29.value=0, stats.30.key=mid2, stats.30.text=, stats.30.value=0, stats.31.key=aw6000, stats.31.text=, stats.31.value=0[08:50:37 PM] , stats.32.key=aw6092, stats.32.text=, stats.32.value=0, stats.33.key=c_wmid2, stats.33.text=, stats.33.value=0, stats.34.key=m1c1, stats.34.text=, stats.34.value=0, stats.35.key=m0c4, stats.35.text=, stats.35.value=0, stats.36.key=m1c5, stats.36.text=[08:50:37 PM] , stats.36.value=0, stats.37.key=m2c3, stats.37.text=, stats.37.value=0, stats.38.key=aw6001, stats.38.text=, stats.38.value=0, stats.39.key=m0c3, stats.39.text=, stats.39.value=0, stats.40.key=m2c1, stats.40.text=, stats.40.value=0, stats.41.key=m2c4[08:50:37 PM] , stats.41.text=, stats.41.value=0}
+ Warning: This PlayNowOptions object has 10 potential filterValue permutations. (This is ok, though, since you only have 1 actual filterValue permutations.)
+ Warning: This PlayNowOptions object has 13 potential filterValue permutations. (This is ok, though, since you only have 1 actual filterValue permutations.)
+ ->N req pnow 0xc000000d {TXN=Start, partition.partition=/eagames/bfwest-dedicated, debugLevel=high, version=1, players.[]=1, players.0.ownerId=2, players.0.ownerType=1, players.0.props.{sessionType}=listServers, players.0.props.{name}=sos[08:50:40 PM] , players.0.props.{firewallType}=unknown, players.0.props.{poolMaxPlayers}=1, players.0.props.{poolTimeout}=30, players.0.props.{poolTargetPlayers}=0:1, players.0.props.{availableServerCount}=1, players.0.props.{maxListServersResult}=20[08:50:40 PM] , players.0.props.{filter-version}="1.42.217478.0 ", players.0.props.{filterToGame-version}=version, players.0.props.{filter-avail_slots_royal}=yes, players.0.props.{filterToGame-avail_slots_royal}=U-avail_slots_royal[08:50:40 PM] , players.0.props.{filter-data_center}=iad, players.0.props.{filterToGame-data_center}=U-data_center, players.0.props.{filter-map}=both, players.0.props.{filterToGame-map}=U-map, players.0.props.{filter-ranked}=yes[08:50:40 PM] , players.0.props.{filterToGame-ranked}=U-ranked, players.0.props.{filter-server_state}=has_players, players.0.props.{filterToGame-server_state}=U-server_state, players.0.props.{filter-servertype}=public[08:50:40 PM] , players.0.props.{filterToGame-servertype}=U-servertype, players.0.props.{pref-army_balance}=Allies, players.0.props.{prefVotingMethod-army_balance}=lottery, players.0.props.{fitValues-army_balance}="MaxAxis,Axis,Balanced,Allies,MaxAllies"[08:50:40 PM] , players.0.props.{fitTable-army_balance}=0;0;0;0;0|-1;0.1;0.5;0.9;1|0;0;0;0;0|1;0.9;0.5;0.1;-1|0;0;0;0;0, players.0.props.{fitWeight-army_balance}=200, players.0.props.{fitThresholds-army_balance}=0:0[08:50:40 PM] , players.0.props.{prefToGame-army_balance}=U-army_balance, players.0.props.{pref-lvl_avg}=1, players.0.props.{aggrPref-lvl_avg}=0, players.0.props.{fitScale-lvl_avg}=4, players.0.props.{fitWeight-lvl_avg}=200[08:50:40 PM] , players.0.props.{fitThresholds-lvl_avg}=0:100, players.0.props.{prefToGame-lvl_avg}=U-lvl_avg, players.0.props.{pref-lvl_sdv}=0, players.0.props.{aggrPref-lvl_sdv}=0, players.0.props.{fitScale-lvl_sdv}=2, players.0.props.{fitWeight-lvl_sdv}=120[08:50:40 PM] , players.0.props.{fitThresholds-lvl_sdv}=0:0, players.0.props.{prefToGame-lvl_sdv}=U-lvl_sdv, players.0.props.{pref-percent_full}=80, players.0.props.{aggrPref-percent_full}=0, players.0.props.{fitScale-percent_full}=30[08:50:40 PM] , players.0.props.{fitWeight-percent_full}=200, players.0.props.{fitThresholds-percent_full}=0:0, players.0.props.{prefToGame-percent_full}=U-percent_full, players.0.props.{}=44}
+20:50:41 : [08:50:41 PM] <-N req pnow 0xc000000d {id.id=1, id.partition=/eagames/bfwest-dedicated, TXN=Start}
+ <-A res pnow 0x80000000 {TXN=Status, id.id=1, id.partition=/eagames/bfwest-dedicated, sessionState=COMPLETE, props.{}=2, props.{resultType}=JOIN, props.{games}.[]=1, props.{games}.0.lid=1, props.{games}.0.fit=1001, props.{games}.0.gid=119}
+ ->N GDAT 0x40000000 {LID=1, GID=119, TID=3}
+ <-N GDAT {AP=0, B-U-army_distribution=0,0,0,0,0,0,0,0,0,0,0, B-U-avail_vips_national=4, B-U-avail_vips_royal=4, B-U-avg_ally_rank=1000, B-U-avg_axis_rank=1000, B-U-lvl_avg=0.000000, B-U-easyzone=no, B-U-elo_rank=1000, GID=119, B-U-ranked=yes, JOIN=O[08:50:41 PM] , LID=-1, B-U-map_name=village, B-U-punkb=0, NAME=[iad]A}
+ ->N EGAM 0x40000000 {R-U-accid=3, R-U-category=3, R-U-dataCenter=iad, R-U-elo=1000, R-U-externalIp=177.32.252.39, R-U-kit=2, R-U-lvl=1, R-U-team=2, PORT=59479, R-INT-PORT=59479, R-INT-IP=192.168.0.10, PTYPE=P, LID=-1, GID=119, TID=4}
+<-N EGAM {TID=4, LID=-1, GID=119}
+<-U EGEG {TID=4, PL=, TICKET=2018751182, PID=3, I=185.13.38.98, P=18567, HUID=1, EKEY=O65zZ2D2A58mNrZw1hmuJw%3d%3d, INT-IP=185.13.38.98, INT-PORT=18567, SECRET=2587913, UGID=MargeSimpson, LID=-1, GID=119}
+ GM: Making host connection. 
+MakeConnId created connident: 0xffffffff773
+ GM: Sent hello to host.
+GM: Received host hello.
+GM: Plasma Unsafe Allowed.
+GM: GSDeveloper=1
+GM: Received roster element.
+GM: Processed roster notice for player id 3 (1 of 1).
+GM: Sent roster ack to host.
+GM: Received join for player 3.
+ GM: Received join complete for player 3.
+ ->O ECNL 0x40000000 {LID=-1, GID=119, TID=5}
+ ->N req rank 0xc000000e {TXN=GetStats, owner=3, ownerType=1, periodId=0, periodPast=0, keys.0=c_items, keys.1=c_wallet_hero, keys.2=c_wallet_valor, keys.[]=3}
+ <-O ENCL {TID=5, GID=119, LID=-1}
+ <-N req rank 0xc000000e {TXN=GetStats, ownerId=3, ownerType=1, stats.[]=3, stats.0.key=c_items, stats.0.text=, stats.0.value=0, stats.1.key=c_wallet_hero, stats.1.text=, stats.1.value=0, stats.2.key=c_wallet_valor, stats.2.text=, stats.2.value=0}
+ UpnpFirewallDetector: Discovered uPnP Device: HUMAX HG100R-L2 BRGCAC 2.0.9
+ UpnpFirewallDetector: opened port successfully at time 7921137 MS)
+ <-A req fsys 0xc0000000 {TXN=MemCheck, salt=}
+ ->R res fsys 0x80000000 {TXN=MemCheck, result=}
